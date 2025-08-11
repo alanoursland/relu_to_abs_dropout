@@ -165,6 +165,37 @@ def run_training_loop(
     compute_timer = SimpleTimer()
     eval_timer = SimpleTimer()
 
+    # --- Epoch 0 (pre-training) evaluation ---
+    print("Evaluating initial state")
+    model.eval()
+    with torch.inference_mode():
+        # Test (using the preloaded test_inputs/test_labels if you already have them)
+        test_outputs0 = model(test_inputs)
+        test_loss0 = criterion(test_outputs0, test_labels).item()
+        _, pred0 = test_outputs0.max(1)
+        test_acc0 = 100.0 * pred0.eq(test_labels).sum().item() / test_labels.size(0)
+
+        # Train eval (fast pass, same transforms as train loader)
+        running_loss0, correct0, total0 = 0.0, 0, 0
+        for xb, yb in train_loader:
+            xb = xb.to(device, non_blocking=True)
+            yb = yb.to(device, non_blocking=True)
+            out = model(xb)
+            running_loss0 += criterion(out, yb).item() * xb.size(0)
+            _, pr = out.max(1)
+            total0 += yb.size(0)
+            correct0 += pr.eq(yb).sum().item()
+        train_loss0 = running_loss0 / total0
+        train_acc0 = 100.0 * correct0 / total0
+
+        print(
+            f"Epoch [{0}/{epochs}] | Train Loss: {train_loss0:.4f} | "
+            f"Train Acc: {train_acc0:.2f}% | Test Acc: {test_acc0:.2f}%"
+        )
+        # Write this as the first stats row so analysis picks it up as "init"
+        run_results.stats.add_epoch(train_loss0, test_loss0, train_acc0, test_acc0)
+
+    print("Starting epoch loop")
     for epoch in range(epochs):
         epoch_timer.tick()
         data_sec = 0.0
@@ -245,10 +276,10 @@ def run_training_loop(
     run_results.stats.set_final(train_loss, test_loss, train_acc, test_acc)
     run_results.save_final_model(model, optimizer)
 
-    save_init_predictions(run_results, model, train_loader, device)
-    save_train_predictions(run_results, model, train_loader, device)
-    save_test_predictions(run_results, test_outputs, device)
-    save_best_predictions(run_results, model, train_loader, device)
+    # save_init_predictions(run_results, model, train_loader, device)
+    # save_train_predictions(run_results, model, train_loader, device)
+    # save_test_predictions(run_results, test_outputs, device)
+    # save_best_predictions(run_results, model, train_loader, device)
 
     run_results.stats.write()
     run_results.timing.write()
@@ -256,7 +287,7 @@ def run_training_loop(
 
 def validate_experiment(config: ExperimentConfig):
     # basic validations (fail fast, as discussed)
-    if config.epochs <= 0:
+    if config.epochs < 0:
         raise ValueError("epochs must be > 0")
     if config.model_fn is None:
         raise ValueError("model_fn must be provided")
@@ -368,7 +399,7 @@ def run_experiment(config: ExperimentConfig):
     # build results metadata
 
     for run_idx, seed in enumerate(seeds):
-        run_results = results.get_run(run_idx, create_mode=True)
+        run_results = results.get_run(run_idx)
 
         print(f"\n=== {config.name} | run {run_idx+1}/{config.num_runs} | seed={seed} ===")
         timer = SimpleTimer()

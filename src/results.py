@@ -450,7 +450,7 @@ class ExperimentalResults:
     def __repr__(self):
         return f"ExperimentalResults(results_dir={self.results_dir})"
 
-    def get_run(self, run_idx: int, create_mode: bool = False) -> RunResults:
+    def get_run(self, run_idx: int) -> RunResults:
         """
         Return a handle for runs/<NNN>/, where NNN = run_idx+1 zero-padded.
         - If the directory exists, return it.
@@ -465,13 +465,12 @@ class ExperimentalResults:
         if run_dir.exists():
             if not run_dir.is_dir():
                 raise NotADirectoryError(f"Path exists but is not a directory: {run_dir}")
-            return RunResults(run_dir, run_idx, create_mode=False)
-
-        if not create_mode:
+        elif self.create_mode:
+            run_dir.mkdir(parents=True, exist_ok=True)
+        else:
             raise FileNotFoundError(f"Run directory not found: {run_dir}")
 
-        run_dir.mkdir(parents=True, exist_ok=True)
-        return RunResults(run_dir, run_idx, create_mode=True)
+        return RunResults(run_dir, run_idx, create_mode=self.create_mode)
 
     @property
     def metadata(self) -> Metadata:
