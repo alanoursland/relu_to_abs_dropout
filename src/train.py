@@ -122,6 +122,7 @@ def save_train_predictions(run_results, model, train_loader, device):
 
 def save_test_predictions(run_results, outputs, device):
     run_results.predictions_test.set_from_tensor(outputs.to(device))
+    run_results.predictions_test.write()
 
 
 def save_best_predictions(run_results, model, train_loader, device):
