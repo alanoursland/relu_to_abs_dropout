@@ -1,0 +1,2 @@
+dropout_rate=0.1 -- 90% ReLU + 10% Abs
+

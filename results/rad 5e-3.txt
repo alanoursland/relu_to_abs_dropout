@@ -1,0 +1,431 @@
+dropout_rate=0.005 -- 99.5% ReLU + 0.05% Abs
+
+(base) E:\Projects\relu_to_abs_dropout\src>python train.py
+cuda
+Total elapsed: 0.00 s | Since last tick: 0.00 s
+Loading dataset
+Files already downloaded and verified
+Files already downloaded and verified
+Total elapsed: 1.04 s | Since last tick: 1.04 s
+Creating model
+Total elapsed: 1.23 s | Since last tick: 0.19 s
+Setting up run
+Total elapsed: 5.56 s | Since last tick: 4.33 s
+Starting training loop
+Total elapsed: 23.94 s | Since last tick: 18.38 s
+Evaluating on test
+Total elapsed: 25.68 s | Since last tick: 1.73 s
+Epoch [1/50] | Train Loss: 1.3842 | Train Acc: 49.45% | Test Acc: 60.50%
+Total elapsed: 40.76 s | Since last tick: 15.09 s
+Evaluating on test
+Total elapsed: 42.24 s | Since last tick: 1.48 s
+Epoch [2/50] | Train Loss: 0.9015 | Train Acc: 67.92% | Test Acc: 69.57%
+Total elapsed: 58.30 s | Since last tick: 16.06 s
+Evaluating on test
+Total elapsed: 59.81 s | Since last tick: 1.51 s
+Epoch [3/50] | Train Loss: 0.6940 | Train Acc: 75.71% | Test Acc: 69.23%
+Total elapsed: 74.12 s | Since last tick: 14.31 s
+Evaluating on test
+Total elapsed: 75.56 s | Since last tick: 1.44 s
+Epoch [4/50] | Train Loss: 0.5800 | Train Acc: 79.87% | Test Acc: 78.45%
+Total elapsed: 90.73 s | Since last tick: 15.17 s
+Evaluating on test
+Total elapsed: 92.20 s | Since last tick: 1.47 s
+Epoch [5/50] | Train Loss: 0.5088 | Train Acc: 82.46% | Test Acc: 78.14%
+Total elapsed: 106.73 s | Since last tick: 14.54 s
+Evaluating on test
+Total elapsed: 108.45 s | Since last tick: 1.72 s
+Epoch [6/50] | Train Loss: 0.4481 | Train Acc: 84.45% | Test Acc: 79.73%
+Total elapsed: 123.19 s | Since last tick: 14.74 s
+Evaluating on test
+Total elapsed: 124.67 s | Since last tick: 1.48 s
+Epoch [7/50] | Train Loss: 0.4033 | Train Acc: 86.08% | Test Acc: 80.64%
+Total elapsed: 140.76 s | Since last tick: 16.09 s
+Evaluating on test
+Total elapsed: 142.21 s | Since last tick: 1.45 s
+Epoch [8/50] | Train Loss: 0.3694 | Train Acc: 87.08% | Test Acc: 83.83%
+Total elapsed: 156.64 s | Since last tick: 14.43 s
+Evaluating on test
+Total elapsed: 158.09 s | Since last tick: 1.45 s
+Epoch [9/50] | Train Loss: 0.3351 | Train Acc: 88.37% | Test Acc: 85.16%
+Total elapsed: 172.57 s | Since last tick: 14.49 s
+Evaluating on test
+Total elapsed: 174.02 s | Since last tick: 1.45 s
+Epoch [10/50] | Train Loss: 0.3109 | Train Acc: 89.33% | Test Acc: 85.63%
+Total elapsed: 188.71 s | Since last tick: 14.69 s
+Evaluating on test
+Total elapsed: 190.22 s | Since last tick: 1.51 s
+Epoch [11/50] | Train Loss: 0.2884 | Train Acc: 89.95% | Test Acc: 86.68%
+Total elapsed: 204.69 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 206.14 s | Since last tick: 1.45 s
+Epoch [12/50] | Train Loss: 0.2669 | Train Acc: 90.71% | Test Acc: 87.05%
+Total elapsed: 220.61 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 222.06 s | Since last tick: 1.45 s
+Epoch [13/50] | Train Loss: 0.2444 | Train Acc: 91.39% | Test Acc: 86.48%
+Total elapsed: 236.51 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 237.95 s | Since last tick: 1.45 s
+Epoch [14/50] | Train Loss: 0.2317 | Train Acc: 91.93% | Test Acc: 87.89%
+Total elapsed: 252.42 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 253.86 s | Since last tick: 1.45 s
+Epoch [15/50] | Train Loss: 0.2160 | Train Acc: 92.38% | Test Acc: 88.58%
+Total elapsed: 268.32 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 269.76 s | Since last tick: 1.45 s
+Epoch [16/50] | Train Loss: 0.2015 | Train Acc: 93.03% | Test Acc: 88.44%
+Total elapsed: 284.22 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 285.68 s | Since last tick: 1.46 s
+Epoch [17/50] | Train Loss: 0.1884 | Train Acc: 93.48% | Test Acc: 90.22%
+Total elapsed: 300.14 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 301.60 s | Since last tick: 1.45 s
+Epoch [18/50] | Train Loss: 0.1776 | Train Acc: 93.69% | Test Acc: 89.25%
+Total elapsed: 316.06 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 317.53 s | Since last tick: 1.47 s
+Epoch [19/50] | Train Loss: 0.1666 | Train Acc: 94.13% | Test Acc: 90.02%
+Total elapsed: 331.99 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 333.44 s | Since last tick: 1.45 s
+Epoch [20/50] | Train Loss: 0.1493 | Train Acc: 94.73% | Test Acc: 89.99%
+Total elapsed: 347.91 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 349.36 s | Since last tick: 1.45 s
+Epoch [21/50] | Train Loss: 0.1475 | Train Acc: 94.76% | Test Acc: 89.74%
+Total elapsed: 363.83 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 365.29 s | Since last tick: 1.45 s
+Epoch [22/50] | Train Loss: 0.1345 | Train Acc: 95.27% | Test Acc: 89.01%
+Total elapsed: 379.75 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 381.20 s | Since last tick: 1.45 s
+Epoch [23/50] | Train Loss: 0.1297 | Train Acc: 95.41% | Test Acc: 89.34%
+Total elapsed: 395.66 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 397.12 s | Since last tick: 1.45 s
+Epoch [24/50] | Train Loss: 0.1268 | Train Acc: 95.58% | Test Acc: 90.46%
+Total elapsed: 411.58 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 413.03 s | Since last tick: 1.45 s
+Epoch [25/50] | Train Loss: 0.1166 | Train Acc: 95.96% | Test Acc: 89.74%
+Total elapsed: 427.49 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 428.95 s | Since last tick: 1.45 s
+Epoch [26/50] | Train Loss: 0.1072 | Train Acc: 96.20% | Test Acc: 90.43%
+Total elapsed: 443.41 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 444.86 s | Since last tick: 1.45 s
+Epoch [27/50] | Train Loss: 0.1031 | Train Acc: 96.42% | Test Acc: 89.28%
+Total elapsed: 459.31 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 460.76 s | Since last tick: 1.45 s
+Epoch [28/50] | Train Loss: 0.0997 | Train Acc: 96.49% | Test Acc: 87.67%
+Total elapsed: 475.22 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 476.67 s | Since last tick: 1.45 s
+Epoch [29/50] | Train Loss: 0.0903 | Train Acc: 96.78% | Test Acc: 90.05%
+Total elapsed: 491.13 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 492.58 s | Since last tick: 1.45 s
+Epoch [30/50] | Train Loss: 0.0903 | Train Acc: 96.81% | Test Acc: 90.32%
+Total elapsed: 507.04 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 508.49 s | Since last tick: 1.45 s
+Epoch [31/50] | Train Loss: 0.0866 | Train Acc: 96.98% | Test Acc: 91.35%
+Total elapsed: 522.95 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 524.40 s | Since last tick: 1.45 s
+Epoch [32/50] | Train Loss: 0.0811 | Train Acc: 97.11% | Test Acc: 91.11%
+Total elapsed: 538.86 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 540.31 s | Since last tick: 1.45 s
+Epoch [33/50] | Train Loss: 0.0779 | Train Acc: 97.18% | Test Acc: 89.86%
+Total elapsed: 554.79 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 556.24 s | Since last tick: 1.46 s
+Epoch [34/50] | Train Loss: 0.0783 | Train Acc: 97.23% | Test Acc: 91.03%
+Total elapsed: 570.70 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 572.15 s | Since last tick: 1.46 s
+Epoch [35/50] | Train Loss: 0.0698 | Train Acc: 97.58% | Test Acc: 91.05%
+Total elapsed: 586.61 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 588.06 s | Since last tick: 1.45 s
+Epoch [36/50] | Train Loss: 0.0708 | Train Acc: 97.52% | Test Acc: 90.90%
+Total elapsed: 602.52 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 603.97 s | Since last tick: 1.45 s
+Epoch [37/50] | Train Loss: 0.0658 | Train Acc: 97.72% | Test Acc: 91.39%
+Total elapsed: 618.44 s | Since last tick: 14.47 s
+Evaluating on test
+Total elapsed: 619.89 s | Since last tick: 1.45 s
+Epoch [38/50] | Train Loss: 0.0674 | Train Acc: 97.58% | Test Acc: 91.74%
+Total elapsed: 634.34 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 635.79 s | Since last tick: 1.45 s
+Epoch [39/50] | Train Loss: 0.0591 | Train Acc: 97.93% | Test Acc: 91.00%
+Total elapsed: 650.25 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 651.71 s | Since last tick: 1.46 s
+Epoch [40/50] | Train Loss: 0.0611 | Train Acc: 97.79% | Test Acc: 91.17%
+Total elapsed: 666.17 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 667.62 s | Since last tick: 1.45 s
+Epoch [41/50] | Train Loss: 0.0586 | Train Acc: 97.96% | Test Acc: 91.29%
+Total elapsed: 682.10 s | Since last tick: 14.48 s
+Evaluating on test
+Total elapsed: 683.55 s | Since last tick: 1.45 s
+Epoch [42/50] | Train Loss: 0.0548 | Train Acc: 98.08% | Test Acc: 91.20%
+Total elapsed: 698.01 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 699.46 s | Since last tick: 1.45 s
+Epoch [43/50] | Train Loss: 0.0555 | Train Acc: 98.06% | Test Acc: 91.45%
+Total elapsed: 713.92 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 715.37 s | Since last tick: 1.45 s
+Epoch [44/50] | Train Loss: 0.0514 | Train Acc: 98.14% | Test Acc: 91.56%
+Total elapsed: 729.83 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 731.29 s | Since last tick: 1.46 s
+Epoch [45/50] | Train Loss: 0.0496 | Train Acc: 98.24% | Test Acc: 90.92%
+Total elapsed: 745.74 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 747.19 s | Since last tick: 1.45 s
+Epoch [46/50] | Train Loss: 0.0514 | Train Acc: 98.16% | Test Acc: 91.97%
+Total elapsed: 761.65 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 763.10 s | Since last tick: 1.45 s
+Epoch [47/50] | Train Loss: 0.0503 | Train Acc: 98.23% | Test Acc: 91.20%
+Total elapsed: 777.55 s | Since last tick: 14.46 s
+Evaluating on test
+Total elapsed: 779.00 s | Since last tick: 1.45 s
+Epoch [48/50] | Train Loss: 0.0453 | Train Acc: 98.39% | Test Acc: 91.89%
+Total elapsed: 793.45 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 794.91 s | Since last tick: 1.46 s
+Epoch [49/50] | Train Loss: 0.0440 | Train Acc: 98.45% | Test Acc: 91.54%
+Total elapsed: 809.36 s | Since last tick: 14.45 s
+Evaluating on test
+Total elapsed: 810.81 s | Since last tick: 1.45 s
+Epoch [50/50] | Train Loss: 0.0457 | Train Acc: 98.39% | Test Acc: 91.98%
+Total elapsed: 810.81 s | Since last tick: 0.00 s
+Exiting
+
+(base) E:\Projects\relu_to_abs_dropout\src>python train.py
+cuda
+Total elapsed: 0.00 s | Since last tick: 0.00 s
+Loading dataset
+Files already downloaded and verified
+Files already downloaded and verified
+Total elapsed: 1.04 s | Since last tick: 1.04 s
+Creating model
+Total elapsed: 1.22 s | Since last tick: 0.18 s
+Setting up run
+Total elapsed: 5.62 s | Since last tick: 4.40 s
+Starting training loop
+Total elapsed: 23.84 s | Since last tick: 18.22 s
+Evaluating on test
+Total elapsed: 25.63 s | Since last tick: 1.79 s
+Epoch [1/50] | Train Loss: 1.3886 | Train Acc: 49.36% | Test Acc: 60.39%
+Total elapsed: 40.42 s | Since last tick: 14.79 s
+Evaluating on test
+Total elapsed: 41.90 s | Since last tick: 1.48 s
+Epoch [2/50] | Train Loss: 0.9214 | Train Acc: 67.31% | Test Acc: 68.77%
+Total elapsed: 56.41 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 57.90 s | Since last tick: 1.49 s
+Epoch [3/50] | Train Loss: 0.7287 | Train Acc: 74.39% | Test Acc: 66.92%
+Total elapsed: 72.71 s | Since last tick: 14.82 s
+Evaluating on test
+Total elapsed: 74.20 s | Since last tick: 1.49 s
+Epoch [4/50] | Train Loss: 0.6071 | Train Acc: 78.82% | Test Acc: 78.59%
+Total elapsed: 88.78 s | Since last tick: 14.58 s
+Evaluating on test
+Total elapsed: 91.04 s | Since last tick: 2.27 s
+Epoch [5/50] | Train Loss: 0.5290 | Train Acc: 81.61% | Test Acc: 78.33%
+Total elapsed: 107.52 s | Since last tick: 16.48 s
+Evaluating on test
+Total elapsed: 109.01 s | Since last tick: 1.49 s
+Epoch [6/50] | Train Loss: 0.4671 | Train Acc: 83.97% | Test Acc: 81.99%
+Total elapsed: 123.72 s | Since last tick: 14.71 s
+Evaluating on test
+Total elapsed: 125.22 s | Since last tick: 1.50 s
+Epoch [7/50] | Train Loss: 0.4247 | Train Acc: 85.24% | Test Acc: 81.34%
+Total elapsed: 140.34 s | Since last tick: 15.12 s
+Evaluating on test
+Total elapsed: 142.24 s | Since last tick: 1.90 s
+Epoch [8/50] | Train Loss: 0.3844 | Train Acc: 86.54% | Test Acc: 84.01%
+Total elapsed: 156.85 s | Since last tick: 14.61 s
+Evaluating on test
+Total elapsed: 158.35 s | Since last tick: 1.49 s
+Epoch [9/50] | Train Loss: 0.3539 | Train Acc: 87.78% | Test Acc: 85.13%
+Total elapsed: 172.84 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 174.33 s | Since last tick: 1.48 s
+Epoch [10/50] | Train Loss: 0.3237 | Train Acc: 88.74% | Test Acc: 84.85%
+Total elapsed: 190.06 s | Since last tick: 15.73 s
+Evaluating on test
+Total elapsed: 191.55 s | Since last tick: 1.49 s
+Epoch [11/50] | Train Loss: 0.2977 | Train Acc: 89.57% | Test Acc: 85.64%
+Total elapsed: 206.47 s | Since last tick: 14.92 s
+Evaluating on test
+Total elapsed: 207.96 s | Since last tick: 1.50 s
+Epoch [12/50] | Train Loss: 0.2763 | Train Acc: 90.51% | Test Acc: 86.35%
+Total elapsed: 222.52 s | Since last tick: 14.55 s
+Evaluating on test
+Total elapsed: 224.06 s | Since last tick: 1.54 s
+Epoch [13/50] | Train Loss: 0.2566 | Train Acc: 91.01% | Test Acc: 86.96%
+Total elapsed: 238.57 s | Since last tick: 14.51 s
+Evaluating on test
+Total elapsed: 240.07 s | Since last tick: 1.50 s
+Epoch [14/50] | Train Loss: 0.2430 | Train Acc: 91.52% | Test Acc: 87.49%
+Total elapsed: 255.63 s | Since last tick: 15.56 s
+Evaluating on test
+Total elapsed: 257.23 s | Since last tick: 1.60 s
+Epoch [15/50] | Train Loss: 0.2199 | Train Acc: 92.21% | Test Acc: 88.51%
+Total elapsed: 274.85 s | Since last tick: 17.62 s
+Evaluating on test
+Total elapsed: 276.97 s | Since last tick: 2.12 s
+Epoch [16/50] | Train Loss: 0.2099 | Train Acc: 92.61% | Test Acc: 88.72%
+Total elapsed: 295.29 s | Since last tick: 18.32 s
+Evaluating on test
+Total elapsed: 296.83 s | Since last tick: 1.54 s
+Epoch [17/50] | Train Loss: 0.1950 | Train Acc: 93.18% | Test Acc: 89.43%
+Total elapsed: 313.68 s | Since last tick: 16.86 s
+Evaluating on test
+Total elapsed: 315.22 s | Since last tick: 1.54 s
+Epoch [18/50] | Train Loss: 0.1827 | Train Acc: 93.58% | Test Acc: 89.48%
+Total elapsed: 330.68 s | Since last tick: 15.46 s
+Evaluating on test
+Total elapsed: 332.19 s | Since last tick: 1.51 s
+Epoch [19/50] | Train Loss: 0.1695 | Train Acc: 94.01% | Test Acc: 88.88%
+Total elapsed: 348.63 s | Since last tick: 16.43 s
+Evaluating on test
+Total elapsed: 350.49 s | Since last tick: 1.87 s
+Epoch [20/50] | Train Loss: 0.1580 | Train Acc: 94.45% | Test Acc: 88.79%
+Total elapsed: 368.66 s | Since last tick: 18.17 s
+Evaluating on test
+Total elapsed: 370.29 s | Since last tick: 1.62 s
+Epoch [21/50] | Train Loss: 0.1459 | Train Acc: 94.83% | Test Acc: 89.41%
+Total elapsed: 386.82 s | Since last tick: 16.53 s
+Evaluating on test
+Total elapsed: 388.82 s | Since last tick: 1.99 s
+Epoch [22/50] | Train Loss: 0.1427 | Train Acc: 94.92% | Test Acc: 89.34%
+Total elapsed: 404.45 s | Since last tick: 15.64 s
+Evaluating on test
+Total elapsed: 406.03 s | Since last tick: 1.58 s
+Epoch [23/50] | Train Loss: 0.1322 | Train Acc: 95.30% | Test Acc: 89.65%
+Total elapsed: 421.20 s | Since last tick: 15.17 s
+Evaluating on test
+Total elapsed: 422.76 s | Since last tick: 1.57 s
+Epoch [24/50] | Train Loss: 0.1259 | Train Acc: 95.65% | Test Acc: 90.18%
+Total elapsed: 439.92 s | Since last tick: 17.15 s
+Evaluating on test
+Total elapsed: 441.43 s | Since last tick: 1.51 s
+Epoch [25/50] | Train Loss: 0.1152 | Train Acc: 95.93% | Test Acc: 89.80%
+Total elapsed: 456.70 s | Since last tick: 15.27 s
+Evaluating on test
+Total elapsed: 458.28 s | Since last tick: 1.58 s
+Epoch [26/50] | Train Loss: 0.1128 | Train Acc: 96.04% | Test Acc: 89.43%
+Total elapsed: 473.88 s | Since last tick: 15.60 s
+Evaluating on test
+Total elapsed: 475.43 s | Since last tick: 1.55 s
+Epoch [27/50] | Train Loss: 0.1046 | Train Acc: 96.29% | Test Acc: 90.52%
+Total elapsed: 490.16 s | Since last tick: 14.73 s
+Evaluating on test
+Total elapsed: 491.67 s | Since last tick: 1.51 s
+Epoch [28/50] | Train Loss: 0.0963 | Train Acc: 96.59% | Test Acc: 90.45%
+Total elapsed: 506.43 s | Since last tick: 14.76 s
+Evaluating on test
+Total elapsed: 507.94 s | Since last tick: 1.51 s
+Epoch [29/50] | Train Loss: 0.0951 | Train Acc: 96.56% | Test Acc: 90.76%
+Total elapsed: 523.16 s | Since last tick: 15.21 s
+Evaluating on test
+Total elapsed: 524.72 s | Since last tick: 1.56 s
+Epoch [30/50] | Train Loss: 0.0912 | Train Acc: 96.67% | Test Acc: 90.51%
+Total elapsed: 540.79 s | Since last tick: 16.07 s
+Evaluating on test
+Total elapsed: 542.41 s | Since last tick: 1.62 s
+Epoch [31/50] | Train Loss: 0.0853 | Train Acc: 96.96% | Test Acc: 89.78%
+Total elapsed: 557.91 s | Since last tick: 15.50 s
+Evaluating on test
+Total elapsed: 559.44 s | Since last tick: 1.54 s
+Epoch [32/50] | Train Loss: 0.0774 | Train Acc: 97.24% | Test Acc: 90.35%
+Total elapsed: 574.51 s | Since last tick: 15.07 s
+Evaluating on test
+Total elapsed: 576.03 s | Since last tick: 1.52 s
+Epoch [33/50] | Train Loss: 0.0816 | Train Acc: 97.18% | Test Acc: 90.52%
+Total elapsed: 591.46 s | Since last tick: 15.43 s
+Evaluating on test
+Total elapsed: 592.94 s | Since last tick: 1.49 s
+Epoch [34/50] | Train Loss: 0.0724 | Train Acc: 97.47% | Test Acc: 90.28%
+Total elapsed: 607.47 s | Since last tick: 14.52 s
+Evaluating on test
+Total elapsed: 608.96 s | Since last tick: 1.50 s
+Epoch [35/50] | Train Loss: 0.0745 | Train Acc: 97.28% | Test Acc: 90.85%
+Total elapsed: 623.46 s | Since last tick: 14.49 s
+Evaluating on test
+Total elapsed: 624.96 s | Since last tick: 1.50 s
+Epoch [36/50] | Train Loss: 0.0699 | Train Acc: 97.45% | Test Acc: 91.38%
+Total elapsed: 639.50 s | Since last tick: 14.54 s
+Evaluating on test
+Total elapsed: 640.99 s | Since last tick: 1.49 s
+Epoch [37/50] | Train Loss: 0.0671 | Train Acc: 97.59% | Test Acc: 90.52%
+Total elapsed: 655.52 s | Since last tick: 14.53 s
+Evaluating on test
+Total elapsed: 657.01 s | Since last tick: 1.49 s
+Epoch [38/50] | Train Loss: 0.0615 | Train Acc: 97.84% | Test Acc: 90.67%
+Total elapsed: 671.52 s | Since last tick: 14.51 s
+Evaluating on test
+Total elapsed: 673.02 s | Since last tick: 1.50 s
+Epoch [39/50] | Train Loss: 0.0609 | Train Acc: 97.83% | Test Acc: 90.37%
+Total elapsed: 687.51 s | Since last tick: 14.49 s
+Evaluating on test
+Total elapsed: 689.01 s | Since last tick: 1.50 s
+Epoch [40/50] | Train Loss: 0.0582 | Train Acc: 98.00% | Test Acc: 90.83%
+Total elapsed: 703.50 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 705.00 s | Since last tick: 1.50 s
+Epoch [41/50] | Train Loss: 0.0549 | Train Acc: 98.07% | Test Acc: 90.74%
+Total elapsed: 719.49 s | Since last tick: 14.49 s
+Evaluating on test
+Total elapsed: 720.98 s | Since last tick: 1.49 s
+Epoch [42/50] | Train Loss: 0.0571 | Train Acc: 98.03% | Test Acc: 91.17%
+Total elapsed: 735.49 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 736.97 s | Since last tick: 1.49 s
+Epoch [43/50] | Train Loss: 0.0505 | Train Acc: 98.23% | Test Acc: 91.66%
+Total elapsed: 751.47 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 752.97 s | Since last tick: 1.50 s
+Epoch [44/50] | Train Loss: 0.0520 | Train Acc: 98.16% | Test Acc: 90.35%
+Total elapsed: 767.47 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 768.96 s | Since last tick: 1.49 s
+Epoch [45/50] | Train Loss: 0.0498 | Train Acc: 98.28% | Test Acc: 91.33%
+Total elapsed: 783.46 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 784.96 s | Since last tick: 1.50 s
+Epoch [46/50] | Train Loss: 0.0527 | Train Acc: 98.15% | Test Acc: 91.70%
+Total elapsed: 799.46 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 800.95 s | Since last tick: 1.49 s
+Epoch [47/50] | Train Loss: 0.0428 | Train Acc: 98.48% | Test Acc: 91.11%
+Total elapsed: 815.44 s | Since last tick: 14.49 s
+Evaluating on test
+Total elapsed: 816.92 s | Since last tick: 1.49 s
+Epoch [48/50] | Train Loss: 0.0458 | Train Acc: 98.40% | Test Acc: 91.28%
+Total elapsed: 831.43 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 832.93 s | Since last tick: 1.50 s
+Epoch [49/50] | Train Loss: 0.0471 | Train Acc: 98.35% | Test Acc: 91.09%
+Total elapsed: 847.42 s | Since last tick: 14.50 s
+Evaluating on test
+Total elapsed: 848.91 s | Since last tick: 1.49 s
+Epoch [50/50] | Train Loss: 0.0437 | Train Acc: 98.49% | Test Acc: 91.60%
+Total elapsed: 848.91 s | Since last tick: 0.00 s
+Exiting

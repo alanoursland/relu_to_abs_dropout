@@ -1,0 +1,24 @@
+{
+  "experiment": "cifar10_baseline",
+  "num_runs": 20,
+  "metrics": {
+    "init": {
+      "train_loss": {
+        "mean": 2.338384573139191,
+        "variance": 0.00037584056585960685
+      },
+      "test_loss": {
+        "mean": 2.3333645820617677,
+        "variance": 0.00028625639381277143
+      },
+      "train_acc": {
+        "mean": 10.0688,
+        "variance": 0.07393616842105262
+      },
+      "test_acc": {
+        "mean": 10.0845,
+        "variance": 0.16527868421052647
+      }
+    }
+}
+}
