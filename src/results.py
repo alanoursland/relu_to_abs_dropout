@@ -381,13 +381,14 @@ class RunResults:
 
     def save_checkpoint(self, tag: str, model, optimizer: Optional[Optimizer] = None):
         path = self._checkpoint_path(tag)
-        state = {"model": model.state_dict()}
+        # move tensors to CPU for serialization
+        model_state_cpu = {k: v.detach().cpu() for k, v in model.state_dict().items()}
+        state = {"model": model_state_cpu}
         if optimizer is not None:
-            state["optimizer"] = optimizer.state_dict()
-
+            state["optimizer"] = optimizer.state_dict()  # optimizer state is CPU by default
         tmp_path = path.with_suffix(".tmp")
         torch.save(state, tmp_path)
-        tmp_path.replace(path)  # atomic-ish
+        tmp_path.replace(path)
         print(f"[RunResults] Saved checkpoint '{tag}' at {path}")
 
     def load_checkpoint(
@@ -583,34 +584,3 @@ results/
 """
 
 
-"""
-results/
-└── cifar10_std_dropout_2em3/                  # Experiment name
-    ├── metadata.json                          # Date, seed, hardware, git commit, env
-    ├── config.json                            # All hyperparams and dataset/model configs
-    ├── logs.txt                               # Raw training logs (stdout/stderr)
-    ├── curves/                                # Metric & loss curves
-    │   ├── train_loss.csv
-    │   ├── val_loss.csv
-    │   ├── train_acc.csv
-    │   ├── val_acc.csv
-    │   └── lr_schedule.csv
-    ├── models/                                # Model checkpoints
-    │   ├── init_weights.pth                   # Before training
-    │   ├── final_weights.pth                  # After training
-    │   └── best_weights.pth                   # Best val accuracy
-    ├── predictions/                           # Model outputs
-    │   ├── test_predictions.csv               # id, true_label, predicted_label, confidence
-    │   ├── misclassified/                     # Visual inspection
-    │   │   ├── img_0001.png
-    │   │   ├── img_0002.png
-    │   │   └── ...
-    ├── timings.json                           # Total time, per-epoch time, eval time
-    ├── splits/                                # Data split indices for reproducibility
-    │   ├── train_indices.npy
-    │   ├── val_indices.npy
-    │   └── test_indices.npy
-    └── env/                                   # Environment snapshot
-        ├── conda_env.yml                      # or requirements.txt
-        └── pip_freeze.txt
-"""

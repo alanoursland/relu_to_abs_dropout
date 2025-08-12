@@ -10,6 +10,7 @@ from config import ExperimentConfig, get_experiment_config
 from results import get_experimental_results, ExperimentalResults
 from typing import Dict, Callable, Optional, List, Any
 import inspect
+import gc
 
 from resnet18 import ReLU2AbsDropout, ResNet18_CIFAR10
 
@@ -121,7 +122,7 @@ def save_train_predictions(run_results, model, train_loader, device):
 
 
 def save_test_predictions(run_results, outputs, device):
-    run_results.predictions_test.set_from_tensor(outputs.to(device))
+    run_results.predictions_test.set_from_tensor(outputs.detach().cpu())
     run_results.predictions_test.write()
 
 
@@ -131,6 +132,7 @@ def save_best_predictions(run_results, model, train_loader, device):
 
 
 def run_training_loop(
+    run_idx,
     epochs,
     stop_delta_loss,
     stop_delta_patience,
@@ -272,6 +274,9 @@ def run_training_loop(
                         f"for {stop_delta_patience} epochs (best={best_train_loss:.4f})."
                     )
                     break
+        if device.type == "cuda":
+            print_mem(f"run{run_idx}-epoch{epoch+1}-end")
+
 
     run_results.stats.set_final(train_loss, test_loss, train_acc, test_acc)
     run_results.save_final_model(model, optimizer)
@@ -375,7 +380,13 @@ def build_results_config(results: ExperimentalResults, config: "ExperimentConfig
         cfg.dataset_info["test_batch_size"] = getattr(test_loader, "batch_size", None)
 
 
-def run_experiment(config: ExperimentConfig):
+def print_mem(tag=""):
+    torch.cuda.synchronize()
+    a = torch.cuda.memory_allocated()/1024**2
+    r = torch.cuda.memory_reserved()/1024**2
+    print(f"[{tag}] alloc={a:.1f}MB  reserved={r:.1f}MB")
+
+def run_experiment(config: ExperimentConfig, start_run=0):
     """
     Minimal runner adapted from run_experiment_hardcoded().
     - Builds a fresh model/optimizer per run.
@@ -399,6 +410,10 @@ def run_experiment(config: ExperimentConfig):
     # build results metadata
 
     for run_idx, seed in enumerate(seeds):
+        if run_idx < start_run:
+            print(f"=== {config.name} | run {run_idx+1}/{config.num_runs} | SKIPPED ===")
+            continue
+
         run_results = results.get_run(run_idx)
 
         print(f"\n=== {config.name} | run {run_idx+1}/{config.num_runs} | seed={seed} ===")
@@ -414,7 +429,7 @@ def run_experiment(config: ExperimentConfig):
         # (optional) log dropout rate if present; fail fast if you rely on it
         if not hasattr(model, "relu") or not hasattr(model.relu, "dropout_rate"):
             # You said: fail fast is sufficient if it's missing
-            print("Warning: model.relu.dropout_rate not found (baseline ReLU without RAD?)")
+            print("Warning: model.activation.dropout_rate not found (baseline ReLU without RAD?)")
 
         criterion = config.criterion or nn.CrossEntropyLoss()
         optimizer = config.optimizer_fn(model)
@@ -430,6 +445,7 @@ def run_experiment(config: ExperimentConfig):
 
         # Train
         run_training_loop(
+            run_idx,
             config.epochs,
             config.stop_delta_loss,
             config.stop_delta_patience,
@@ -451,19 +467,29 @@ def run_experiment(config: ExperimentConfig):
     results.metadata.write()
     results.end_log()
 
+    print_mem("Cleaning memory")
+    del model, optimizer, criterion, test_inputs, test_labels
+    gc.collect()
+    torch.cuda.empty_cache()
+    print_mem("Memory cleaned")
+    print(f"Total time elapsed: {timer.elapsed()}s")
+
 
 def main():
-    run_experiment(get_experiment_config("cifar10_baseline"))
+    # run_experiment(get_experiment_config("cifar10_baseline"))
     
-    run_experiment(get_experiment_config("cifar10_std_dropout_5em3"))
+    run_experiment(get_experiment_config("cifar10_std_dropout_5em3"), start_run=1)
+    run_experiment(get_experiment_config("cifar10_abs_dropout_5em3"))    
+
     run_experiment(get_experiment_config("cifar10_std_dropout_1em2"))
+    run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"))
+
     run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
+    run_experiment(get_experiment_config("cifar10_abs_dropout_2em2"))
+
+    run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
     run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
 
-    run_experiment(get_experiment_config("cifar10_abs_dropout_5em3"))    
-    run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"))
-    run_experiment(get_experiment_config("cifar10_abs_dropout_2em2"))
-    run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
 
 
 if __name__ == "__main__":

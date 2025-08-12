@@ -15,7 +15,7 @@ import torch
 def set_abs_dropout(model, p: float):
     # Your activation is on model.relu in ResNet18_CIFAR10
     if hasattr(model, "relu") and hasattr(model.relu, "dropout_rate"):
-        model.relu.dropout_rate = float(p)
+        model.activation.dropout_rate = float(p)
 
 @torch.no_grad()
 def recalibrate_bn(model, loader, device, max_batches=None):

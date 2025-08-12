@@ -264,8 +264,8 @@ def main():
     # Put whatever you want to evaluate here (order doesn’t matter)
     exp_names = [
         "cifar10_baseline",
-        "cifar10_std_dropout_2em2",
-        "cifar10_abs_dropout_2em2",
+        # "cifar10_std_dropout_2em2",
+        # "cifar10_abs_dropout_2em2",
         # "cifar10_std_dropout_5em3",
         # "cifar10_std_dropout_1em2",
         # "cifar10_std_dropout_2em3",
