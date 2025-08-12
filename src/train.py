@@ -453,11 +453,11 @@ def run_experiment(config: ExperimentConfig):
 
 
 def main():
-    run_experiment(get_experiment_config("cifar10_baseline"))
+    # run_experiment(get_experiment_config("cifar10_baseline"))
     # run_experiment(get_experiment_config("cifar10_std_dropout_2em3"))
     # run_experiment(get_experiment_config("cifar10_std_dropout_5em3"))
     # run_experiment(get_experiment_config("cifar10_std_dropout_1em2"))
-    # run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
+    run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
 
 
 if __name__ == "__main__":
