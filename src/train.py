@@ -130,6 +130,42 @@ def save_best_predictions(run_results, model, train_loader, device):
     run_results.load_best_model(model)
     eval_and_save_predictions(model, train_loader, device, run_results.predictions_best)
 
+def evaluate_test_batched(model, test_inputs, test_labels, criterion, batch_size=2000, device='cuda'):
+    """
+    Evaluate test set in batches to avoid memory explosion.
+    Returns: test_loss, test_outputs, test_acc
+    """
+    model.eval()
+    total_loss = 0.0
+    all_outputs = []
+    total_correct = 0
+    total_samples = 0
+    
+    with torch.no_grad():
+        for i in range(0, test_inputs.size(0), batch_size):
+            # Get batch slice
+            batch_inputs = test_inputs[i:i+batch_size]
+            batch_labels = test_labels[i:i+batch_size]
+            
+            # Forward pass
+            batch_outputs = model(batch_inputs)
+            batch_loss = criterion(batch_outputs, batch_labels)
+            
+            # Accumulate results
+            total_loss += batch_loss.item() * batch_inputs.size(0)
+            all_outputs.append(batch_outputs)
+            
+            # Accuracy calculation
+            _, predicted = batch_outputs.max(1)
+            total_correct += predicted.eq(batch_labels).sum().item()
+            total_samples += batch_labels.size(0)
+    
+    # Combine all outputs
+    test_outputs = torch.cat(all_outputs, dim=0)
+    test_loss = total_loss / total_samples
+    test_acc = 100.0 * total_correct / total_samples
+    
+    return test_loss, test_outputs, test_acc
 
 def run_training_loop(
     run_idx,
@@ -167,15 +203,21 @@ def run_training_loop(
     compute_timer = SimpleTimer()
     eval_timer = SimpleTimer()
 
+    # print_mem(f"run{run_idx}-epoch{0}-start")
+    # torch.cuda.empty_cache()
+
     # --- Epoch 0 (pre-training) evaluation ---
     print("Evaluating initial state")
     model.eval()
     with torch.inference_mode():
         # Test (using the preloaded test_inputs/test_labels if you already have them)
-        test_outputs0 = model(test_inputs)
-        test_loss0 = criterion(test_outputs0, test_labels).item()
-        _, pred0 = test_outputs0.max(1)
-        test_acc0 = 100.0 * pred0.eq(test_labels).sum().item() / test_labels.size(0)
+        test_loss0, _, test_acc0 = evaluate_test_batched(
+            model, 
+            test_inputs, 
+            test_labels, 
+            criterion, 
+            batch_size=2000, 
+            device=device)
 
         # Train eval (fast pass, same transforms as train loader)
         running_loss0, correct0, total0 = 0.0, 0, 0
@@ -196,6 +238,8 @@ def run_training_loop(
         )
         # Write this as the first stats row so analysis picks it up as "init"
         run_results.stats.add_epoch(train_loss0, test_loss0, train_acc0, test_acc0)
+    # print_mem(f"run{run_idx}-epoch{0}-init")
+    # torch.cuda.empty_cache()
 
     print("Starting epoch loop")
     for epoch in range(epochs):
@@ -209,6 +253,8 @@ def run_training_loop(
         correct = 0
         total = 0
 
+        # print_mem(f"run{run_idx}-epoch{epoch+1}-train")
+        torch.cuda.empty_cache()
         for inputs, labels in train_loader:
             data_timer.tick()
             inputs, labels = inputs.to(device), labels.to(device)
@@ -230,22 +276,32 @@ def run_training_loop(
         train_loss = running_loss / total
         train_acc = 100.0 * correct / total
 
+        # print_mem(f"run{run_idx}-epoch{epoch+1}-test")
+        torch.cuda.empty_cache()
         # if device.type == "cuda":
         #     torch.cuda.synchronize()
         timer.tick()
         eval_timer.tick()
         print("Evaluating on test")
-        model.eval()
-        with torch.no_grad():
-            test_outputs = model(test_inputs)
-            test_loss = criterion(test_outputs, test_labels).item()
-            _, predicted = test_outputs.max(1)
-            test_correct = predicted.eq(test_labels).sum().item()
-            test_total = test_labels.size(0)
-        test_acc = 100.0 * test_correct / test_total
+        test_loss, _, test_acc = evaluate_test_batched(
+            model, 
+            test_inputs, 
+            test_labels, 
+            criterion, 
+            batch_size=2000, 
+            device=device)
+
+        # model.eval()
+        # with torch.no_grad():
+        #     test_outputs = model(test_inputs)
+        #     test_loss = criterion(test_outputs, test_labels).item()
+        #     _, predicted = test_outputs.max(1)
+        #     test_correct = predicted.eq(test_labels).sum().item()
+        #     test_total = test_labels.size(0)
+        # test_acc = 100.0 * test_correct / test_total
         # if device.type == "cuda":
         #     torch.cuda.synchronize()
-        eval_sec += eval_timer.tick()
+        eval_sec += eval_timer.tick(log=True)
 
         if train_acc > best_train_acc:
             best_train_acc = train_acc
@@ -274,8 +330,8 @@ def run_training_loop(
                         f"for {stop_delta_patience} epochs (best={best_train_loss:.4f})."
                     )
                     break
-        if device.type == "cuda":
-            print_mem(f"run{run_idx}-epoch{epoch+1}-end")
+        # print_mem(f"run{run_idx}-epoch{epoch+1}-end")
+        torch.cuda.empty_cache()
 
 
     run_results.stats.set_final(train_loss, test_loss, train_acc, test_acc)
@@ -467,22 +523,22 @@ def run_experiment(config: ExperimentConfig, start_run=0):
     results.metadata.write()
     results.end_log()
 
-    print_mem("Cleaning memory")
-    del model, optimizer, criterion, test_inputs, test_labels
-    gc.collect()
-    torch.cuda.empty_cache()
-    print_mem("Memory cleaned")
+    # print_mem("Cleaning memory")
+    # del model, optimizer, criterion, test_inputs, test_labels
+    # gc.collect()
+    # torch.cuda.empty_cache()
+    # print_mem("Memory cleaned")
     print(f"Total time elapsed: {timer.elapsed()}s")
 
 
 def main():
     # run_experiment(get_experiment_config("cifar10_baseline"))
     
-    run_experiment(get_experiment_config("cifar10_std_dropout_5em3"), start_run=1)
-    run_experiment(get_experiment_config("cifar10_abs_dropout_5em3"))    
+    # run_experiment(get_experiment_config("cifar10_std_dropout_5em3"), start_run=11)
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_5em3"))    
 
-    run_experiment(get_experiment_config("cifar10_std_dropout_1em2"))
-    run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"))
+    # run_experiment(get_experiment_config("cifar10_std_dropout_1em2"), start_run=6)
+    run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"), start_run=10)
 
     run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
     run_experiment(get_experiment_config("cifar10_abs_dropout_2em2"))
