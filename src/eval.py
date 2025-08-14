@@ -116,6 +116,7 @@ class FastEvaluator:
             per_run.append(
                 {
                     "id": run.id,
+                    "index": run_idx,
                     "final": {
                         "train_loss": float(tr_loss),
                         "test_loss": float(te_loss),
@@ -125,21 +126,38 @@ class FastEvaluator:
                 }
             )
 
+        # Aggregate summary (unchanged)
         summary = self._summarize(per_run)
-        out = {
+        out_aggregate = {
             "experiment": self.exp_name,
             "num_runs": len(per_run),
             "metrics": {"final": summary},
-            # "runs": per_run,
+        }
+
+        # Full output including per-run details
+        out_full = {
+            **out_aggregate,
+            "runs": per_run,  # include per-run metrics alongside the aggregate
         }
 
         if self.save_json:
-            out_path = self.results.results_dir / "fast_eval.json"
-            out_path.write_text(json.dumps(out, indent=2))
-            print(f"[fast-eval] wrote {out_path}")
+            # Keep existing aggregate file path for backward compatibility
+            agg_path = self.results.results_dir / "fast_eval.json"
+            agg_path.write_text(json.dumps(out_aggregate, indent=2))
+            print(f"[fast-eval] wrote {agg_path}")
 
-        return out
+            # New file that contains the per-run breakdown (plus headers for context)
+            runs_path = self.results.results_dir / "fast_eval_runs.json"
+            runs_payload = {
+                "experiment": self.exp_name,
+                "num_runs": len(per_run),
+                "runs": per_run,
+            }
+            runs_path.write_text(json.dumps(runs_payload, indent=2))
+            print(f"[fast-eval] wrote {runs_path}")
 
+        # Return both (callers can choose which they need)
+        return out_full
     # --- internals ---
     def _rebuild_model(self) -> nn.Module:
         cfg = get_experiment_config(self.exp_name)
@@ -263,12 +281,15 @@ def evaluate_experiments(
 def main():
     # Put whatever you want to evaluate here (order doesn’t matter)
     exp_names = [
-        "cifar10_baseline",
-        # "cifar10_std_dropout_2em2",
+        # "cifar10_abs_dropout_1em2",
         # "cifar10_abs_dropout_2em2",
-        # "cifar10_std_dropout_5em3",
+        # "cifar10_abs_dropout_5em3",
+        "cifar10_baseline",
         # "cifar10_std_dropout_1em2",
+        # "cifar10_std_dropout_2em2",
+        # "cifar10_std_dropout_5em3",
         # "cifar10_std_dropout_2em3",
+        # "cifar10_abs_dropout_2em3",
     ]
 
     out = evaluate_experiments(
