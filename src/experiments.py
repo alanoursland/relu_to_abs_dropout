@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from config import experiment, get_experiment_config, ExperimentConfig
-from resnet18 import ReLU2AbsDropout, ReLUDropout, ResNet18_CIFAR10
+from resnet18 import ReLU2AbsDropout, ReLUDropout, ReLUMixedAbsDropout, ResNet18_CIFAR10
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 from data import get_cifar10_loaders
@@ -104,5 +104,13 @@ def cifar10_abs_dropout_3em2() -> ExperimentConfig:
     config = get_experiment_config("cifar10_baseline")
     config.description = "Resnet18 with abs dropout 3e-2 for CIFAR-10"
     config.model_fn = fn_resnet18_cifar10(activation=ReLU2AbsDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
+def cifar10_mixed_dropout_2em2() -> ExperimentConfig:
+    dropout_rate = 2e-2
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 2e-2 and abs dropout 2e-2 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUMixedAbsDropout(dropout_rate=dropout_rate))
     return config
 

@@ -39,6 +39,36 @@ class ReLU2AbsDropout(nn.Module):
 
         return torch.where(x > 0, x, a * x)
 
+class ReLUMixedAbsDropout(nn.Module):
+    def __init__(self, rate=0.1, inplace=False):
+        """
+        Applies ReLU, then:
+          1) With probability `rate` (per element), flip negative magnitudes to positive (abs-like).
+          2) Apply standard dropout with probability `rate` (independently).
+        In eval mode: just ReLU.
+        """
+        super().__init__()
+        self.rate = float(rate)
+        self.relu = nn.ReLU(inplace=inplace)
+        self.dropout = nn.Dropout(p=self.rate)
+
+    def forward(self, x):
+        if not self.training or self.rate == 0:
+            return self.relu(x)
+
+        # ReLU
+        relu_x = self.relu(x)
+
+        # Abs-flip mask
+        flip_mask = (torch.rand_like(x) < self.rate).float()
+        neg_relu_x = self.relu(-x)
+
+        # Dropout
+        x = relu_x + flip_mask * neg_relu_x
+        x = self.dropout(x)
+
+        return relu_x
+
 
 # Custom BasicBlock that supports any activation
 class BasicBlockWithActivation(resnet.BasicBlock):
