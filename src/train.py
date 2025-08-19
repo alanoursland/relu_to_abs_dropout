@@ -450,6 +450,7 @@ def run_experiment(config: ExperimentConfig, start_run=0):
     - Preloads the (single-batch) test tensors to device and evaluates like your hardcoded script.
     - Fast-fails on continue_from until results.py handles it.
     """
+    total_timer = SimpleTimer()
     results = get_experimental_results(config.name, create_mode=True)
     results.start_log()
 
@@ -480,6 +481,18 @@ def run_experiment(config: ExperimentConfig, start_run=0):
         timer.tick()
         print("Creating model")
         model = config.model_fn()
+
+        num_classes = 100 if "cifar100" in config.name.lower() else 10
+        # Try common head name first
+        if hasattr(model, "fc") and isinstance(model.fc, nn.Linear):
+            if model.fc.out_features != num_classes:
+                model.fc = nn.Linear(model.fc.in_features, num_classes)
+        # Fall back: some custom models store classifier elsewhere
+        elif hasattr(model, "classifier") and isinstance(model.classifier, nn.Linear):
+            if model.classifier.out_features != num_classes:
+                model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+
+
         model = model.to(device)
 
         # (optional) log dropout rate if present; fail fast if you rely on it
@@ -528,7 +541,7 @@ def run_experiment(config: ExperimentConfig, start_run=0):
     # gc.collect()
     # torch.cuda.empty_cache()
     # print_mem("Memory cleaned")
-    print(f"Total time elapsed: {timer.elapsed()}s")
+    print(f"Total time elapsed: {total_timer.elapsed()}s")
 
 
 def main():
@@ -538,15 +551,26 @@ def main():
     # run_experiment(get_experiment_config("cifar10_abs_dropout_5em3"))    
 
     # run_experiment(get_experiment_config("cifar10_std_dropout_1em2"), start_run=6)
-    run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"), start_run=10)
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_1em2"), start_run=10)
 
-    run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
-    run_experiment(get_experiment_config("cifar10_abs_dropout_2em2"))
+    # run_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_2em2"))
 
-    run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
-    run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
+    # run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_3em2"))
 
+    run_experiment(get_experiment_config("cifar10_std_dropout_5em2"))
+    run_experiment(get_experiment_config("cifar10_abs_dropout_5em2"))
 
+    # run_experiment(get_experiment_config("cifar10_mixed_dropout_2em2"), start_run=5)
+
+    # run_experiment(get_experiment_config("cifar100_baseline"), start_run=0)
+    # run_experiment(get_experiment_config("cifar100_std_dropout_2em2"), start_run=2)
+    # run_experiment(get_experiment_config("cifar100_std_dropout_1em1"), start_run=1)
+    # run_experiment(get_experiment_config("cifar100_std_dropout_2em1"), start_run=1)
+
+    # run_experiment(get_experiment_config("cifar100_abs_dropout_2em2"), start_run=0)
+    # run_experiment(get_experiment_config("cifar100_mixed_dropout_2em2"), start_run=0)
 
 if __name__ == "__main__":
     import experiments as _  # only load/execute decorators in the main process

@@ -19,6 +19,9 @@ class ReLUDropout(nn.Module):
         x = self.dropout(x)
         return x
 
+    def set_dropout(self, p):
+        self.dropout.p = 0
+
 
 class ReLU2AbsDropout(nn.Module):
     def __init__(self, dropout_rate=0.05):
@@ -38,6 +41,9 @@ class ReLU2AbsDropout(nn.Module):
         a = torch.where(mask < self.dropout_rate, torch.full_like(x, -1.0), torch.zeros_like(x))
 
         return torch.where(x > 0, x, a * x)
+
+    def set_dropout(self, p):
+        self.dropout_rate = p
 
 class ReLUMixedAbsDropout(nn.Module):
     def __init__(self, rate=0.1, inplace=False):
@@ -69,6 +75,9 @@ class ReLUMixedAbsDropout(nn.Module):
 
         return relu_x
 
+    def set_dropout(self, p):
+        self.rate = p
+        self.dropout.p = 0
 
 # Custom BasicBlock that supports any activation
 class BasicBlockWithActivation(resnet.BasicBlock):
@@ -153,3 +162,7 @@ class ResNet18_CIFAR10(nn.Module):
         x = self.fc(x)
 
         return x
+
+    def set_dropout(self, p):
+        print("Setting dropout to zero")
+        self.relu.set_dropout(p)

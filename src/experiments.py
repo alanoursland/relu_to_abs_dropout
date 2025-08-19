@@ -4,18 +4,20 @@ import torch.optim as optim
 
 from config import experiment, get_experiment_config, ExperimentConfig
 from resnet18 import ReLU2AbsDropout, ReLUDropout, ReLUMixedAbsDropout, ResNet18_CIFAR10
+from wrn28_10 import wrn28_10_cifar100
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
-from data import get_cifar10_loaders
-
+from data import get_cifar10_loaders, get_cifar100_loaders
 
 def fn_resnet18_cifar10(activation):
     return lambda: ResNet18_CIFAR10(num_classes=10, activation=activation)
 
+def fn_wrn28_10_cifar100(activation):
+    return lambda: wrn28_10_cifar100(activation=activation)
+
 
 @experiment()
 def cifar10_baseline() -> ExperimentConfig:
-    """Factory function for absolute value XOR experiment."""
     batch_size = 128
     dropout_rate = 0.0
     epochs = 150
@@ -75,6 +77,14 @@ def cifar10_std_dropout_3em2() -> ExperimentConfig:
     return config
 
 @experiment()
+def cifar10_std_dropout_5em2() -> ExperimentConfig:
+    dropout_rate = 5e-2
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 5e-2 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
 def cifar10_abs_dropout_5em3() -> ExperimentConfig:
     dropout_rate = 5e-3
     config = get_experiment_config("cifar10_baseline")
@@ -107,10 +117,99 @@ def cifar10_abs_dropout_3em2() -> ExperimentConfig:
     return config
 
 @experiment()
+def cifar10_abs_dropout_5em2() -> ExperimentConfig:
+    dropout_rate = 5e-2
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with abs dropout 5e-2 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLU2AbsDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
+def cifar10_mixed_dropout_1em2() -> ExperimentConfig:
+    dropout_rate = 1e-2
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 1e-2 and abs dropout 1e-2 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUMixedAbsDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config
+
+@experiment()
 def cifar10_mixed_dropout_2em2() -> ExperimentConfig:
     dropout_rate = 2e-2
     config = get_experiment_config("cifar10_baseline")
     config.description = "Resnet18 with standard dropout 2e-2 and abs dropout 2e-2 for CIFAR-10"
     config.model_fn = fn_resnet18_cifar10(activation=ReLUMixedAbsDropout(dropout_rate=dropout_rate))
+    config.num_runs = 5
     return config
 
+@experiment()
+def cifar100_baseline() -> ExperimentConfig:
+    batch_size = 128
+    dropout_rate = 0.0
+    epochs = 150
+    stop_delta_loss = 1e-3
+    stop_delta_patience = 20
+    learning_rate = 0.001
+
+    # CIFAR-100 dataset
+    train_loader, test_loader = get_cifar100_loaders(batch_size, num_workers=1)
+
+    config = ExperimentConfig()
+    config.description = "Baseline wrn-28-10 for CIFAR-100"
+
+    config.num_runs = 1
+    config.random_seeds = [3553]
+    config.train_loader = train_loader
+    config.test_loader = test_loader
+    config.epochs = epochs
+    config.stop_delta_loss = stop_delta_loss
+    config.stop_delta_patience = stop_delta_patience
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLUDropout(dropout_rate=dropout_rate))
+    config.optimizer_fn = lambda model: optim.Adam(model.parameters(), lr=learning_rate)
+    config.criterion = nn.CrossEntropyLoss()
+    return config
+
+@experiment()
+def cifar100_std_dropout_2em2() -> ExperimentConfig:
+    dropout_rate = 2e-2
+    config = get_experiment_config("cifar100_baseline")
+    config.description = "wrn-28-10 with standard dropout 2e-2 for CIFAR-100"
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLUDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config
+
+@experiment()
+def cifar100_std_dropout_1em1() -> ExperimentConfig:
+    dropout_rate = 1e-1
+    config = get_experiment_config("cifar100_baseline")
+    config.description = "wrn-28-10 with standard dropout 0.10 for CIFAR-100"
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLUDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config
+
+@experiment()
+def cifar100_std_dropout_2em1() -> ExperimentConfig:
+    dropout_rate = 2e-1
+    config = get_experiment_config("cifar100_baseline")
+    config.description = "wrn-28-10 with standard dropout 0.20 for CIFAR-100"
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLUDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config
+
+@experiment()
+def cifar100_abs_dropout_2em2() -> ExperimentConfig:
+    dropout_rate = 2e-2
+    config = get_experiment_config("cifar100_baseline")
+    config.description = "wrn-28-10 with abs dropout 2e-2 for CIFAR-100"
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLU2AbsDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config
+
+@experiment()
+def cifar100_mixed_dropout_2em2() -> ExperimentConfig:
+    dropout_rate = 2e-2
+    config = get_experiment_config("cifar100_baseline")
+    config.description = "wrn-28-10 with mixed dropout 2e-2 for CIFAR-100"
+    config.model_fn = fn_wrn28_10_cifar100(activation=ReLUMixedAbsDropout(dropout_rate=dropout_rate))
+    config.num_runs = 1
+    return config

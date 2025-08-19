@@ -1,7 +1,32 @@
 # eval.py
+"""
+Evaluation for trained CIFAR experiments using experiment-provided DataLoaders.
+
+Highlights
+- Uses each experiment's config-provided train/test DataLoaders (no giant tensor staging).
+- Clear separation of model restoration, BN conditioning (optional), and split evaluation.
+- Minimal, readable prints; optional JSON outputs with backward-compatible filenames.
+- CLI via argparse; programmatic API preserved (evaluate_experiments).
+
+Assumptions:
+- Experiments are registered via `experiments` module side-effects.
+- `config.get_experiment_config(exp_name)` returns an object with:
+    - `.model_fn()` (callable building a fresh model)
+    - `.criterion` (optional; defaults to CrossEntropyLoss if absent)
+    - `.train_loader` and `.test_loader` (PyTorch DataLoaders)
+- `results.get_experimental_results(exp_name, create_mode=False)` exposes:
+    - `.metadata.num_runs`
+    - `.get_run(i)` -> RunResults with `.id` and `.load_final_model(...)`.
+"""
+
+from __future__ import annotations
+
+import argparse
 import json
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
+from config import ExperimentConfig
 
 import torch
 import torch.nn as nn
@@ -9,109 +34,226 @@ import torch.nn as nn
 # project imports
 from config import get_experiment_config
 from results import get_experimental_results
-from data import _get_cifar10_datasets  # cached deterministic test TensorDataset
 
 
-# ------------------------------
-# Shared data (one load on GPU)
-# ------------------------------
-class DataBundle:
-    def __init__(self, device: torch.device, chunk_size: int = 8192):
-        self.device = device
-        self.chunk_size = int(chunk_size)
-        self.train_x, self.train_y, self.test_x, self.test_y = self._load_cifar10_tensors()
-        self._move_to_device_()
+# ---------------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------------
+def check_mem():
+    # print(f"Allocated: {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+    pass
 
-    def _load_cifar10_tensors(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        """
-        - Train: apply train transform *once* per sample (no DataLoader), stack into one big tensor
-        - Test: data.py already builds a TensorDataset with deterministic transforms
-        """
-        train_ds, test_ds = _get_cifar10_datasets()
-
-        train_imgs, train_labels = [], []
-        for img, label in train_ds:
-            train_imgs.append(img)
-            train_labels.append(label)
-        train_x = torch.stack(train_imgs, dim=0)  # [50000,3,32,32]
-        train_y = torch.tensor(train_labels, dtype=torch.long)  # [50000]
-
-        test_x, test_y = test_ds.tensors  # ([10000,3,32,32], [10000])
-        return train_x, train_y, test_x, test_y
-
-    def _move_to_device_(self):
-        self.train_x = self.train_x.to(self.device, non_blocking=True)
-        self.train_y = self.train_y.to(self.device, non_blocking=True)
-        self.test_x = self.test_x.to(self.device, non_blocking=True)
-        self.test_y = self.test_y.to(self.device, non_blocking=True)
+def resolve_device(spec: str) -> torch.device:
+    """Resolve a device string ('auto' | 'cpu' | 'cuda' | 'cuda:0' | etc.) to torch.device."""
+    if spec == "auto":
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return torch.device(spec)
 
 
-# ------------------------------
-# Single-experiment evaluator
-# ------------------------------
-class FastEvaluator:
-    def __init__(
-        self,
-        exp_name: str,
-        data: DataBundle,
-        device: torch.device,
-        bn_passes: int = 1,
-        save_json: bool = True,
-    ):
-        self.exp_name = exp_name
-        self.device = device
-        self.data = data
-        self.bn_passes = int(bn_passes)
-        self.save_json = save_json
+def to_device_batch(batch, device: torch.device):
+    """Move a (inputs, targets) batch to device with non_blocking when CUDA is used."""
+    non_blocking = device.type == "cuda"
+    x, y = batch
+    return x.to(device, non_blocking=non_blocking), y.to(device, non_blocking=non_blocking)
 
-        # Load results handle (no creation) and metadata
-        self.results = get_experimental_results(exp_name, create_mode=False)
+
+def get_criterion(exp_cfg: ExperimentConfig) -> nn.Module:
+    return exp_cfg.criterion if getattr(exp_cfg, "criterion", None) is not None else nn.CrossEntropyLoss()
+
+
+def rebuild_model(exp_cfg: ExperimentConfig) -> nn.Module:
+    if exp_cfg.model_fn is None:
+        raise ValueError("config.model_fn is None; cannot rebuild model")
+    return exp_cfg.model_fn()
+
+
+def get_loaders(exp_cfg: ExperimentConfig):
+    if not hasattr(exp_cfg, "train_loader") or not hasattr(exp_cfg, "test_loader"):
+        raise ValueError(
+            f"Experiment '{exp_cfg.name}' does not provide 'train_loader' and 'test_loader' on its config."
+        )
+    return exp_cfg.train_loader, exp_cfg.test_loader
+
+def create_eval_loaders(exp_cfg: ExperimentConfig):
+    import data
+
+    if exp_cfg.name.startswith("cifar10_"):      
+        return data.get_cifar10_loaders(
+            batch_size=4096, 
+            eval_batch_size=4096,
+            num_workers=0,
+            eval_mode=True
+            )
+    elif exp_cfg.name.startswith("cifar100_"):
+        return data.get_cifar100_loaders(
+            batch_size=2048, 
+            eval_batch_size=2048,
+            num_workers=0,
+            eval_mode=True
+            )
+    raise Exception(f"Unsupported data set for {exp_cfg.name}")
+
+def disable_all_dropout(model: nn.Module) -> None:
+    """Disable standard and common custom dropout fields in-place."""
+    for m in model.modules():
+        if isinstance(m, (nn.Dropout, nn.Dropout2d, nn.Dropout3d, nn.AlphaDropout)):
+            m.p = 0.0
+            m.eval()
+        elif hasattr(m, "set_dropout"):
+            m.set_dropout(0)
+            m.eval()
+
+
+@torch.no_grad()
+def condition_batchnorm_with_loader(
+    model: nn.Module,
+    train_loader,
+    device: torch.device,
+    *,
+    passes: int = 1,
+) -> None:
+    """
+    Recompute BatchNorm running statistics using passes over the training inputs.
+    Keeps dropout disabled. No labels needed. Uses the config's train_loader.
+    """
+    has_bn = any(isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)) for m in model.modules())
+    if not has_bn:
+        return
+
+    was_training = model.training
+    model.train(True)
+
+    for _ in range(max(1, int(passes))):
+        for xb, _ in train_loader:
+            xb = xb.to(device, non_blocking=(device.type == "cuda"))
+            _ = model(xb)
+
+    if not was_training:
+        model.eval()
+
+
+@torch.no_grad()
+def eval_split_with_loader(
+    model: nn.Module,
+    loader,
+    device: torch.device,
+    criterion: nn.Module,
+) -> Tuple[float, float]:
+    """
+    Evaluate mean loss and accuracy (in %) over a split using its DataLoader.
+    """
+    model.eval()
+    total_loss = 0.0
+    total_correct = 0
+    total_examples = 0
+
+    for batch in loader:
+        # print(f"\tEval batch {total_examples}")
+        xb, yb = to_device_batch(batch, device)
+        logits = model(xb)
+        loss = criterion(logits, yb)
+
+        bsz = yb.size(0)
+        total_examples += bsz
+        total_loss += float(loss.item()) * bsz
+        preds = logits.argmax(dim=1)
+        total_correct += int((preds == yb).sum().item())
+
+    mean_loss = total_loss / max(1, total_examples)
+    acc = 100.0 * total_correct / max(1, total_examples)
+    return mean_loss, acc
+
+
+def summarize_runs(per_run: List[Dict]) -> Dict[str, Dict[str, float]]:
+    """Compute mean/variance for final metrics across runs."""
+    keys = ["train_loss", "test_loss", "train_acc", "test_acc"]
+    values = {k: [] for k in keys}
+    for r in per_run:
+        for k in keys:
+            values[k].append(r["final"][k])
+
+    def mean_var(arr: List[float]) -> Tuple[float, float]:
+        n = len(arr)
+        if n == 0:
+            return 0.0, 0.0
+        mean = sum(arr) / n
+        if n < 2:
+            return mean, 0.0
+        var = sum((a - mean) ** 2 for a in arr) / (n - 1)
+        return mean, var
+
+    out = {}
+    for k, arr in values.items():
+        m, v = mean_var(arr)
+        out[k] = {"mean": m, "variance": v}
+    return out
+
+
+# ---------------------------------------------------------------------
+# Per-experiment evaluator
+# ---------------------------------------------------------------------
+@dataclass
+class EvalConfig:
+    exp_name: str
+    device: torch.device
+    bn_passes: int = 1
+    save_json: bool = True
+
+
+class LoaderEvaluator:
+    def __init__(self, cfg: EvalConfig) -> None:
+        self.cfg = cfg
+        self.exp_cfg = get_experiment_config(self.cfg.exp_name)
+        self.results = get_experimental_results(cfg.exp_name, create_mode=False)
         self.meta = self.results.metadata
-
-        # Loss for evaluation (per-experiment)
-        cfg = get_experiment_config(exp_name)
-        self.criterion = cfg.criterion if cfg.criterion is not None else nn.CrossEntropyLoss()
+        self.criterion = get_criterion(self.exp_cfg)
+        self.train_loader, self.test_loader = create_eval_loaders(self.exp_cfg)
 
     def evaluate(self) -> Dict:
         if not hasattr(self.meta, "num_runs") or self.meta.num_runs <= 0:
-            raise FileNotFoundError(f"No runs recorded for experiment '{self.exp_name}'")
+            raise FileNotFoundError(f"No runs recorded for experiment '{self.cfg.exp_name}'")
 
-        print(f"Evaluating experiment {self.exp_name}")
-        per_run = []
+        print(f"[eval] Experiment: {self.cfg.exp_name} | runs: {self.meta.num_runs}")
+        check_mem()
+        per_run: List[Dict] = []
+
         for run_idx in range(self.meta.num_runs):
-            print(f"    Starting run {run_idx}")
             run = self.results.get_run(run_idx)  # RunResults
+            print(f"  • Run {run_idx} (id={run.id})")
+            check_mem()
 
-            # Rebuild model via experiment registry (guarantees arch parity)
-            print(f"        Rebuilding model")
-            model = self._rebuild_model().to(self.device, non_blocking=True)
-
-            # Load final checkpoint via RunResults API (device-aware)
-            print(f"        Loading model checkpoint")
-            loaded = run.load_final_model(model, optimizer=None, strict=True, map_location=self.device)
+            # Rebuild & load
+            model = rebuild_model(self.exp_cfg).to(self.cfg.device)
+            loaded = run.load_final_model(model, optimizer=None, strict=True, map_location=self.cfg.device)
             if not loaded:
-                # Skip runs without a final checkpoint
+                print("    - No final checkpoint found; skipping")
                 continue
 
-            # Turn off *all* dropout variants (standard + custom)
-            print(f"        Disabling dropout")
-            self._disable_dropout_everywhere(model)
+            # Prepare model for deterministic eval
+            disable_all_dropout(model)
+            print("Conditioning Batch Norm")
+            check_mem()
+            condition_batchnorm_with_loader(
+                model,
+                self.train_loader,
+                self.cfg.device,
+                passes=self.cfg.bn_passes,
+            )
+            check_mem()
 
-            # Condition BatchNorm on the full training set (dropout stays off)
-            print(f"        Conditioning Batchnorm")
-            self._condition_batchnorm(model, self.data.train_x, chunk_size=self.data.chunk_size, passes=self.bn_passes)
-
-            # Eval on train/test
-            model.eval()
+            # Evaluate
             with torch.inference_mode():
-                print(f"        Evaluating training set")
-                tr_loss, tr_acc = self._eval_split(
-                    model, self.data.train_x, self.data.train_y, self.criterion, self.data.chunk_size
+                print("Evaluating train")
+                check_mem()
+                tr_loss, tr_acc = eval_split_with_loader(
+                    model, self.train_loader, self.cfg.device, self.criterion
                 )
-                print(f"        Evaluating test set")
-                te_loss, te_acc = self._eval_split(
-                    model, self.data.test_x, self.data.test_y, self.criterion, self.data.chunk_size
+                check_mem()
+                print("Evaluating test")
+                te_loss, te_acc = eval_split_with_loader(
+                    model, self.test_loader, self.cfg.device, self.criterion
                 )
+                check_mem()
 
             per_run.append(
                 {
@@ -126,176 +268,82 @@ class FastEvaluator:
                 }
             )
 
-        # Aggregate summary (unchanged)
-        summary = self._summarize(per_run)
+        # Aggregate
+        summary = summarize_runs(per_run)
         out_aggregate = {
-            "experiment": self.exp_name,
+            "experiment": self.cfg.exp_name,
             "num_runs": len(per_run),
             "metrics": {"final": summary},
         }
+        out_full = {**out_aggregate, "runs": per_run}
 
-        # Full output including per-run details
-        out_full = {
-            **out_aggregate,
-            "runs": per_run,  # include per-run metrics alongside the aggregate
-        }
+        # Save (keep original filenames for compatibility)
+        if self.cfg.save_json:
+            results_dir: Path = self.results.results_dir
+            agg_path = results_dir / "fast_eval.json"
+            runs_path = results_dir / "fast_eval_runs.json"
 
-        if self.save_json:
-            # Keep existing aggregate file path for backward compatibility
-            agg_path = self.results.results_dir / "fast_eval.json"
             agg_path.write_text(json.dumps(out_aggregate, indent=2))
-            print(f"[fast-eval] wrote {agg_path}")
-
-            # New file that contains the per-run breakdown (plus headers for context)
-            runs_path = self.results.results_dir / "fast_eval_runs.json"
             runs_payload = {
-                "experiment": self.exp_name,
+                "experiment": self.cfg.exp_name,
                 "num_runs": len(per_run),
                 "runs": per_run,
             }
             runs_path.write_text(json.dumps(runs_payload, indent=2))
-            print(f"[fast-eval] wrote {runs_path}")
+            print(f"[eval] Wrote {agg_path.name} and {runs_path.name} in {results_dir}")
 
-        # Return both (callers can choose which they need)
         return out_full
-    # --- internals ---
-    def _rebuild_model(self) -> nn.Module:
-        cfg = get_experiment_config(self.exp_name)
-        if cfg.model_fn is None:
-            raise ValueError("config.model_fn is None; cannot rebuild model")
-        return cfg.model_fn()
-
-    @staticmethod
-    def _disable_dropout_everywhere(model: nn.Module) -> None:
-        for m in model.modules():
-            if isinstance(m, (nn.Dropout, nn.Dropout2d, nn.Dropout3d, nn.AlphaDropout)):
-                m.p = 0.0
-                m.eval()
-            if hasattr(m, "dropout") and isinstance(m.dropout, nn.Dropout):
-                m.dropout.p = 0.0
-            if hasattr(m, "dropout_rate"):
-                try:
-                    m.dropout_rate = 0.0
-                except Exception:
-                    pass
-
-    @torch.no_grad()
-    def _condition_batchnorm(self, model: nn.Module, train_x: torch.Tensor, chunk_size: int = 8192, passes: int = 1):
-        has_bn = any(isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)) for m in model.modules())
-        if not has_bn:
-            return
-
-        was_training = model.training
-        model.train(True)
-
-        N = train_x.size(0)
-        for _ in range(max(1, passes)):
-            for i in range(0, N, chunk_size):
-                xb = train_x[i : i + chunk_size]
-                _ = model(xb)
-
-        if not was_training:
-            model.eval()
-
-    @torch.no_grad()
-    def _eval_split(
-        self,
-        model: nn.Module,
-        x: torch.Tensor,
-        y: torch.Tensor,
-        criterion: nn.Module,
-        chunk_size: int = 8192,
-    ) -> Tuple[float, float]:
-        N = x.size(0)
-        total_loss = 0.0
-        total_correct = 0
-        for i in range(0, N, chunk_size):
-            xb = x[i : i + chunk_size]
-            yb = y[i : i + chunk_size]
-            logits = model(xb)
-            loss = criterion(logits, yb)
-            total_loss += float(loss.item()) * xb.size(0)
-            preds = logits.argmax(dim=1)
-            total_correct += int((preds == yb).sum().item())
-        return total_loss / N, 100.0 * total_correct / N
-
-    @staticmethod
-    def _summarize(per_run: List[Dict]) -> Dict[str, Dict[str, float]]:
-        keys = ["train_loss", "test_loss", "train_acc", "test_acc"]
-        values = {k: [] for k in keys}
-        for r in per_run:
-            for k in keys:
-                values[k].append(r["final"][k])
-
-        def mean_var(arr: List[float]) -> Tuple[float, float]:
-            n = len(arr)
-            if n == 0:
-                return 0.0, 0.0
-            mean = sum(arr) / n
-            if n < 2:
-                return mean, 0.0
-            var = sum((a - mean) ** 2 for a in arr) / (n - 1)  # sample variance
-            return mean, var
-
-        out = {}
-        for k, arr in values.items():
-            m, v = mean_var(arr)
-            out[k] = {"mean": m, "variance": v}
-        return out
 
 
-# ------------------------------
-# Multi-experiment driver
-# ------------------------------
-def _resolve_device(s: str) -> torch.device:
-    if s == "auto":
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return torch.device(s)
-
-
+# ---------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------
 def evaluate_experiments(
-    exp_names: List[str],
+    exp_names: Iterable[str],
+    *,
     device: str = "auto",
-    chunk_size: int = 16384,
     bn_passes: int = 1,
     save_json: bool = True,
 ) -> Dict[str, Dict]:
-    dev = _resolve_device(device)
-    # One CIFAR-10 load, shared across all experiments
-    data = DataBundle(device=dev, chunk_size=chunk_size)
+    dev = resolve_device(device)
 
     results_by_exp: Dict[str, Dict] = {}
     for name in exp_names:
-        evaluator = FastEvaluator(
-            exp_name=name,
-            data=data,
-            device=dev,
-            bn_passes=bn_passes,
-            save_json=save_json,
+        evaluator = LoaderEvaluator(
+            EvalConfig(
+                exp_name=name,
+                device=dev,
+                bn_passes=bn_passes,
+                save_json=save_json,
+            )
         )
         results_by_exp[name] = evaluator.evaluate()
-
     return results_by_exp
-
 
 def main():
     # Put whatever you want to evaluate here (order doesn’t matter)
     exp_names = [
-        # "cifar10_abs_dropout_1em2",
-        # "cifar10_abs_dropout_2em2",
-        # "cifar10_abs_dropout_5em3",
         "cifar10_baseline",
-        # "cifar10_std_dropout_1em2",
-        # "cifar10_std_dropout_2em2",
-        # "cifar10_std_dropout_5em3",
-        # "cifar10_std_dropout_2em3",
-        # "cifar10_abs_dropout_2em3",
+
+        "cifar10_abs_dropout_1em2",
+        "cifar10_abs_dropout_2em2",
+        "cifar10_abs_dropout_3em2",
+        "cifar10_abs_dropout_5em3",
+
+        "cifar10_std_dropout_1em2",
+        "cifar10_std_dropout_2em2",
+        "cifar10_std_dropout_3em2",
+        "cifar10_std_dropout_5em3",
+
+        # "cifar100_baseline",
+        # "cifar100_std_dropout_2em2",
+        # "cifar100_std_dropout_1em1",
+        # "cifar100_std_dropout_2em1"
     ]
 
     out = evaluate_experiments(
         exp_names=exp_names,
         device="auto",
-        chunk_size=4096,
         bn_passes=1,
         save_json=True,
     )

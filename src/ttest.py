@@ -212,9 +212,24 @@ def main():
     # ap.add_argument("experiment_a", type=str, help="First experiment name (A) under results/")
     # ap.add_argument("experiment_b", type=str, help="Second experiment name (B) under results/")
     # args = ap.parse_args()
+
+    calculate_paired_ttests("cifar10_abs_dropout_5em3", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_abs_dropout_1em2", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_abs_dropout_2em2", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_abs_dropout_3em2", "cifar10_baseline")
+
+    calculate_paired_ttests("cifar10_std_dropout_5em3", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_std_dropout_1em2", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_std_dropout_2em2", "cifar10_baseline")
+    calculate_paired_ttests("cifar10_std_dropout_3em2", "cifar10_baseline")
+
     # calculate_paired_ttests("cifar10_abs_dropout_3em2", "cifar10_baseline")
     # calculate_paired_ttests("cifar10_abs_dropout_3em2", "cifar10_std_dropout_3em2")
-    calculate_paired_ttests("cifar10_std_dropout_3em2", "cifar10_baseline")
+    # calculate_paired_ttests("cifar10_std_dropout_3em2", "cifar10_baseline")
+
+    # calculate_paired_ttests("cifar10_mixed_dropout_2em2", "cifar10_baseline")
+    # calculate_paired_ttests("cifar10_mixed_dropout_2em2", "cifar10_std_dropout_3em2")
+    # calculate_paired_ttests("cifar10_mixed_dropout_2em2", "cifar10_abs_dropout_3em2")
 
 
 if __name__ == "__main__":
