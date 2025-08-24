@@ -559,8 +559,16 @@ def main():
     # run_experiment(get_experiment_config("cifar10_std_dropout_3em2"))
     # run_experiment(get_experiment_config("cifar10_abs_dropout_3em2"))
 
-    run_experiment(get_experiment_config("cifar10_std_dropout_5em2"))
-    run_experiment(get_experiment_config("cifar10_abs_dropout_5em2"))
+    # run_experiment(get_experiment_config("cifar10_std_dropout_5em2"))
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_5em2"))
+
+    # run_experiment(get_experiment_config("cifar10_std_dropout_1em1"))
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_1em1"), start_run=11)
+
+    # run_experiment(get_experiment_config("cifar10_std_dropout_2em1"))
+    # run_experiment(get_experiment_config("cifar10_abs_dropout_2em1"))
+
+    run_experiment(get_experiment_config("cifar10_std_dropout_3em1"))
 
     # run_experiment(get_experiment_config("cifar10_mixed_dropout_2em2"), start_run=5)
 

@@ -1,0 +1,137 @@
+[
+  {
+    "experiment": "cifar10_abs_dropout_5em3 vs cifar10_baseline",
+    "mean_acc_A": 92.2433,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.1580,
+    "t_statistic": -1.87095,
+    "df": 14,
+    "p_value": 0.0823995
+  },
+  {
+    "experiment": "cifar10_abs_dropout_1em2 vs cifar10_baseline",
+    "mean_acc_A": 92.5333,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.1320,
+    "t_statistic": 1.40264,
+    "df": 14,
+    "p_value": 0.18251
+  },
+  {
+    "experiment": "cifar10_abs_dropout_2em2 vs cifar10_baseline",
+    "mean_acc_A": 92.5080,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.1067,
+    "t_statistic": 1.10104,
+    "df": 14,
+    "p_value": 0.289451
+  },
+  {
+    "experiment": "cifar10_abs_dropout_3em2 vs cifar10_baseline",
+    "mean_acc_A": 92.4813,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.0800,
+    "t_statistic": 0.684462,
+    "df": 14,
+    "p_value": 0.504857
+  },
+  {
+    "experiment": "cifar10_abs_dropout_5em2 vs cifar10_baseline",
+    "mean_acc_A": 92.3173,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.0840,
+    "t_statistic": -0.992262,
+    "df": 14,
+    "p_value": 0.337911
+  },
+  {
+    "experiment": "cifar10_abs_dropout_1em1 vs cifar10_baseline",
+    "mean_acc_A": 92.0880,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.3133,
+    "t_statistic": -3.71642,
+    "df": 14,
+    "p_value": 0.00230128
+  },
+  {
+    "experiment": "cifar10_abs_dropout_2em1 vs cifar10_baseline",
+    "mean_acc_A": 90.8693,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -1.5320,
+    "t_statistic": -9.71885,
+    "df": 14,
+    "p_value": 1.32836e-07
+  },
+  {
+    "experiment": "cifar10_std_dropout_5em3 vs cifar10_baseline",
+    "mean_acc_A": 92.2787,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.1227,
+    "t_statistic": -1.72894,
+    "df": 14,
+    "p_value": 0.105798
+  },
+  {
+    "experiment": "cifar10_std_dropout_1em2 vs cifar10_baseline",
+    "mean_acc_A": 92.2907,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.1107,
+    "t_statistic": -0.966918,
+    "df": 14,
+    "p_value": 0.349993
+  },
+  {
+    "experiment": "cifar10_std_dropout_2em2 vs cifar10_baseline",
+    "mean_acc_A": 92.3860,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.0153,
+    "t_statistic": -0.179947,
+    "df": 14,
+    "p_value": 0.859773
+  },
+  {
+    "experiment": "cifar10_std_dropout_3em2 vs cifar10_baseline",
+    "mean_acc_A": 92.5507,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.1493,
+    "t_statistic": 1.89924,
+    "df": 14,
+    "p_value": 0.0783349
+  },
+  {
+    "experiment": "cifar10_std_dropout_5em2 vs cifar10_baseline",
+    "mean_acc_A": 92.4593,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.0580,
+    "t_statistic": 0.572466,
+    "df": 14,
+    "p_value": 0.576085
+  },
+  {
+    "experiment": "cifar10_std_dropout_1em1 vs cifar10_baseline",
+    "mean_acc_A": 92.5780,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.1767,
+    "t_statistic": 2.52463,
+    "df": 14,
+    "p_value": 0.0242822
+  },
+  {
+    "experiment": "cifar10_std_dropout_2em1 vs cifar10_baseline",
+    "mean_acc_A": 92.7393,
+    "mean_acc_B": 92.4013,
+    "mean_diff": 0.3380,
+    "t_statistic": 5.33334,
+    "df": 14,
+    "p_value": 0.00010559
+  },
+  {
+    "experiment": "cifar10_std_dropout_3em1 vs cifar10_baseline",
+    "mean_acc_A": 92.2547,
+    "mean_acc_B": 92.4013,
+    "mean_diff": -0.1467,
+    "t_statistic": -1.99278,
+    "df": 14,
+    "p_value": 0.0661526
+  }
+]

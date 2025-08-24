@@ -85,6 +85,30 @@ def cifar10_std_dropout_5em2() -> ExperimentConfig:
     return config
 
 @experiment()
+def cifar10_std_dropout_1em1() -> ExperimentConfig:
+    dropout_rate = 1e-1
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 1e-1 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
+def cifar10_std_dropout_2em1() -> ExperimentConfig:
+    dropout_rate = 2e-1
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 2e-1 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
+def cifar10_std_dropout_3em1() -> ExperimentConfig:
+    dropout_rate = 3e-1
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with standard dropout 3e-1 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLUDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
 def cifar10_abs_dropout_5em3() -> ExperimentConfig:
     dropout_rate = 5e-3
     config = get_experiment_config("cifar10_baseline")
@@ -125,6 +149,24 @@ def cifar10_abs_dropout_5em2() -> ExperimentConfig:
     return config
 
 @experiment()
+def cifar10_abs_dropout_1em1() -> ExperimentConfig:
+    dropout_rate = 1e-1
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with abs dropout 1e-1 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLU2AbsDropout(dropout_rate=dropout_rate))
+    return config
+
+@experiment()
+def cifar10_abs_dropout_2em1() -> ExperimentConfig:
+    dropout_rate = 2e-1
+    config = get_experiment_config("cifar10_baseline")
+    config.description = "Resnet18 with abs dropout 2e-1 for CIFAR-10"
+    config.model_fn = fn_resnet18_cifar10(activation=ReLU2AbsDropout(dropout_rate=dropout_rate))
+    return config
+
+##################################################################
+
+@experiment()
 def cifar10_mixed_dropout_1em2() -> ExperimentConfig:
     dropout_rate = 1e-2
     config = get_experiment_config("cifar10_baseline")
@@ -141,6 +183,10 @@ def cifar10_mixed_dropout_2em2() -> ExperimentConfig:
     config.model_fn = fn_resnet18_cifar10(activation=ReLUMixedAbsDropout(dropout_rate=dropout_rate))
     config.num_runs = 5
     return config
+
+
+##################################################################
+
 
 @experiment()
 def cifar100_baseline() -> ExperimentConfig:

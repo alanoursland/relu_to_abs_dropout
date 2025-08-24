@@ -158,8 +158,8 @@ def analyze_experiment(config: ExperimentConfig) -> Path:
 
 
 def main():
-    # analyze_experiment(get_experiment_config("cifar10_baseline"))
-    analyze_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
+    analyze_experiment(get_experiment_config("cifar10_baseline"))
+    # analyze_experiment(get_experiment_config("cifar10_std_dropout_2em2"))
 
 
 if __name__ == "__main__":
